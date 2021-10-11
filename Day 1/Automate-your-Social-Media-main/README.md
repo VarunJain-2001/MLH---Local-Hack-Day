@@ -5,4 +5,4 @@ personal fronts.<br/>
 • The second, uses an API to execute the tasks. Since, a deeper level of security is incorporated in this
 methodology, this tool can be used at public levels.
 
-soc_poster.py uses selenium in python to execute the tasks, and api_soc_poster uses API to do the same.
+soc_poster.py uses selenium in python to execute the tasks, and api_soc_poster uses API to do the same
