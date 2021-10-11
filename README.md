@@ -2,4 +2,4 @@
 1. Varun Jain
 2. Kshitij Tyagi
 3. Mudit paliwal
-4. Divyansg Singhal
+4. Divyansh Singhal
