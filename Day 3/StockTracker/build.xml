@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<project name="StockTicker Project" default="all" basedir=".">
+
+    <property name="src.dir" value="src${file.separator}main${file.separator}java" description="project source code"/>
+    <property name="src-test.dir" value="src${file.separator}test${file.separator}java" description="project test code"/>
+    <property name="lib.dir" value="lib" description="project libraries are found here"/>
+    <property name="images.dir" value="images" description="project image files are found here"/>
+    <property name="sql.dir" value="sql" description="project sql schema files"/>
+    <property name="config.dir" value="config" description="project configuration property files"/>
+    <property name="build.dir" value="build"
+              description="anything this build script generates goes under this directory"/>
+    <property name="classes.dir" value="${build.dir}${file.separator}classes"
+              description="Java class files compiled by this build script  go here"/>
+    <property name="doc.dir" value="doc" description="root of doc directory"/>
+    <property name="doc.api.dir" value="doc${file.separator}api"
+              description="Java class files compiled by this build script  go here"/>
+    <property name="log.dir" value="log" description="all log4j logging files are here"/>
+    <property name="report.dir" value="${build.dir}${file.separator}report"
+              description="this directory is for all reports - xml and html"/>
+    <property name="report.junit.dir" value="${report.dir}${file.separator}junit"
+              description="this directory is used by JUnit. Test results are placed here in a nice HTML format"/>
+    <!-- Currently, the temp db is being persisted to disk, but wiped out each time clean is run. Switch to
+         using init_cached.sql and data dir for persistent persistence. -->
+    <property name="temp.db.dir" value="data/temp" description="location of temp db files wiped out each run" />
+    <property name="data.db.dir" value="data" description="h2 database files"/>
+
+    <!-- cobertura properties -->
+    <property name="cobertura.home" value="lib"/>
+    <property name="cobertura.instrumented.dir" value="${build.dir}${file.separator}instrumented" />
+    <property name="cobertura.reports.dir" value="${report.dir}${file.separator}coverage" />
+    <property name="cobertura.junit.xml.dir" value="${cobertura.reports.dir}${file.separator}junit-xml" />
+    <property name="cobertura.junit.html.dir" value="${cobertura.reports.dir}${file.separator}junit-html" />
+    <property name="cobertura.coverage.html.dir" value="${cobertura.reports.dir}${file.separator}cobertura-html" />
+    <property name="cobertura.data.file" value="cobertura.ser" />
+    <property name="cobertura.jar.file" value="${lib.dir}${file.separator}cobertura-2.0.3.jar" />
+
+    <!-- this sets up the classpath for the project. Whenever you add a .jar to the lib directory it will
+         automatically be added to the classpath
+    -->
+    <path id="project.classpath" description="the project's class path all third party libs are on it. ">
+        <pathelement path="${classes.dir}"/>
+        <pathelement path="${config.dir}"/>
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- TARGETS BEGIN HERE -->
+
+    <target name="clean" description="deletes all build artifacts (anything created by this build file)">
+        <delete dir="${classes.dir}"/>
+        <delete dir="${temp.db.dir}"/>
+        <delete dir="${log.dir}"/>
+        <delete file="stockticker.jar"/>
+        <delete file="stockticker-all.zip"/>
+    </target>
+
+    <target name="wipedb" description="deletes all database files in the data directory and removes the directory">
+        <delete dir="${data.db.dir}"/>
+    </target>
+
+    <target name="init" description="Build initialization - create output directories" depends="clean">
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${log.dir}"/>
+    </target>
+
+    <!-- Compiles all source - main and test -->
+    <target name="compile" description="Compile all the code; produce classes" depends="init">
+        <javac destdir="${classes.dir}" fork="true" deprecation="on" includeantruntime="false">
+            <src path="${src.dir}"/>
+            <src path="${src-test.dir}"/>
+            <classpath refid="project.classpath"/>
+            <compilerarg line="-Xlint:unchecked" />
+        </javac>
+    </target>
+
+    <!-- Compiles all source with debug options - main only, test is non-debug -->
+    <target name="debug" description="Compile all the code with debug options; produce classes" depends="init">
+        <javac destdir="${classes.dir}" debug="true" fork="true" debuglevel="vars,lines,source" deprecation="on" includeantruntime="false">
+            <src path="${src.dir}"/>
+            <src path="${src-test.dir}"/>
+            <classpath refid="project.classpath"/>
+            <compilerarg line="-Xlint:unchecked" />
+        </javac>
+    </target>
+
+    <!-- Creates a jar file -->
+    <target name="jar" depends="compile" description="generates the jar file" >
+        <mkdir dir="META-INF"/>
+        <manifest file="${basedir}/META-INF/MANIFEST.MF" mode="replace">
+            <attribute name="Main-Class" value="com.stockticker.ui.StockTickerMain"/>
+            <attribute name="Class-Path" value="./lib/h2-1.3.175.jar
+                                                ./lib/jackson-annotations-2.2.3.jar
+                                                ./lib/jackson-core-2.2.3.jar
+                                                ./lib/jackson-databind-2.2.3.jar
+                                                ./lib/jasypt-1.9.2.jar
+                                                ./lib/log4j-1.2.9.jar
+                                                ./lib/jcalendar.jar"/>
+        </manifest>
+        <jar manifest="${basedir}/META-INF/MANIFEST.MF" destfile="stockticker.jar" basedir="${classes.dir}" excludes="">
+            <fileset dir="${basedir}">
+                <include name="META-INF/MANIFEST.MF"/>
+                <include name="README.md"/>
+                <exclude name="build/instrumented/**"/>
+                <exclude name="build/report/**"/>
+            </fileset>
+        </jar>
+    </target>
+
+    <!-- Creates a distribution zip file -->
+    <target name="dist" depends="jar"  description="generates the distribution zip file" >
+        <zip destfile="stockticker-all.zip" basedir="."
+             excludes=".idea/,build/**,data/**,lib/**,resources/**,META-INF/**,src/**,build.xml,cobertura.ser,**/*.pdf">
+
+            <zipfileset dir="${lib.dir}" prefix="lib">
+                <include name="h2-1.3.175.jar" />
+                <include name="jackson-annotations-2.2.3.jar" />
+                <include name="jackson-core-2.2.3.jar" />
+                <include name="jackson-databind-2.2.3.jar" />
+                <include name="jasypt-1.9.2.jar" />
+                <include name="log4j-1.2.9.jar" />
+                <include name="jcalendar.jar" />
+            </zipfileset>
+        </zip>
+    </target>
+
+    <target name="run" depends="jar">
+        <java jar="stockticker.jar" fork="true" classpath="project.classpath">
+            <!-- to pass multiple jvm arguments, create one jvmarg per argument -->
+            <jvmarg value=""/>
+            <!-- to pass multiple application arguments, create one arg per argument -->
+            <arg value=""/>
+        </java>
+    </target>
+
+    <target name="javadoc" depends="init" description="Generate source JavaDoc">
+        <delete dir="${doc.api.dir}"/>
+        <mkdir dir="${doc.api.dir}"/>
+        <javadoc packagenames="com.stockticker.*"
+                 classpathref="project.classpath"
+                 sourcepath="src/main/java"
+                 excludepackagenames=""
+                 defaultexcludes="yes"
+                 destdir="doc/api"
+                 author="true"
+                 version="true"
+                 use="true"
+                 windowtitle="Stock Ticker API">
+            <doctitle><![CDATA[<h1>StockTicker</h1>]]></doctitle>
+            <bottom><![CDATA[Final Project - Stock Ticker - Stu Connall, Mike Grissom, and Paul Wallace]]></bottom>
+            <tag name="todo" scope="all" description="To do:"/>
+            <group title="Stock Ticker Common Classes" packages="com.stockticker*"/>
+            <group title="Stock Ticker User Interface Classes" packages="com.stockticker.ui*"/>
+            <group title="Stock Ticker Business Logic Classes" packages="com.stockticker.logic*"/>
+            <group title="Stock Ticker Persistence Classes" packages="com.stockticker.persistence*"/>
+            <link offline="true" href="http://docs.oracle.com/javase/7/docs/api/" packagelistLoc="/temp:/tmp"/>
+            <link href="http://docs.oracle.com/javase/7/docs/api/"/>
+        </javadoc>
+    </target>
+
+    <target name="test" description="Runs all the JUnit tests and generates the test results report" depends="compile">
+
+        <delete dir="${report.junit.dir}" />
+        <mkdir dir="${report.junit.dir}" />
+        <junit printsummary="yes" haltonfailure="false" showoutput="true" failureproperty="test_failure">
+            <classpath refid="project.classpath"/>
+
+            <formatter type="xml"/>
+
+            <batchtest fork="yes" todir="${report.junit.dir}">
+                <fileset dir="${src-test.dir}">
+                    <include name="**/*Test*.java"/>
+                </fileset>
+
+            </batchtest>
+        </junit>
+
+        <junitreport todir="${report.junit.dir}">
+            <fileset dir="${report.junit.dir}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${report.junit.dir}${file.separator}html"/>
+        </junitreport>
+
+        <!-- if a test fails then the property  "test_failure" will be set and we fail now.
+         Failng now, rather than when the test actually failed allows all the tests to complete and the report
+         to be generated.
+         -->
+        <fail if="test_failure" message="At least one JUnit test failed. Please see report."/>
+
+    </target>
+
+    <!-- Cobertura code coverage -->
+    <target name="coverage" depends="debug">
+
+        <delete dir="${cobertura.instrumented.dir}"/>
+        <delete dir="${cobertura.reports.dir}"/>
+        <delete file="cobertura.ser" />
+        <!-- cobertura directories -->
+        <mkdir dir="${cobertura.instrumented.dir}" />
+        <mkdir dir="${cobertura.junit.xml.dir}" />
+        <mkdir dir="${cobertura.junit.html.dir}" />
+        <mkdir dir="${cobertura.coverage.html.dir}" />
+
+        <!-- set up the Cobertura classpath -->
+        <path id="cobertura.classpath">
+            <fileset dir="${cobertura.home}">
+                <include name="cobertura-2.0.3.jar"/>
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="${lib.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+        </path>
+        <!-- Cobertura task definition -->
+        <taskdef classpathref="cobertura.classpath" resource="tasks.properties"/>
+
+        <!-- Instrumentation starts here -->
+        <cobertura-instrument todir="${cobertura.instrumented.dir}" datafile="${cobertura.data.file}" ignoreTrivial="true" >
+            <ignore regex="org.apache.log4j.*" />
+            <fileset dir="${classes.dir}">
+                <include name="**/*.class"/>
+                <exclude name="**/*Test.class"/>
+                <exclude name="**/*$*.class"/>
+            </fileset>
+        </cobertura-instrument>
+
+        <!-- Executes the Cobertura junit tests -->
+        <junit showoutput="true" printsummary="withOutAndErr" fork="true" forkmode="once" failureproperty="test.failed">
+            <classpath refid="cobertura.classpath" />
+            <sysproperty key="net.sourceforge.cobertura.datafile" file="${cobertura.data.file}" />
+
+            <classpath location="${cobertura.instrumented.dir}" />
+            <classpath location="${classes.dir}"/>
+            <classpath location="${lib.dir}"/>
+            <formatter type="xml" />
+            <batchtest todir="${cobertura.junit.xml.dir}/">
+                <fileset dir="${src-test.dir}">
+                    <include name="**/*Test*.java"/>
+                    <exclude name="**/*$*.class"/>
+                </fileset>
+            </batchtest>
+        </junit>
+
+        <!-- Generates the Cobertura junit xml reports -->
+        <junitreport todir="${cobertura.junit.html.dir}">
+            <fileset dir="${cobertura.junit.xml.dir}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${cobertura.junit.html.dir}"/>
+        </junitreport>
+
+        <!-- Generates the Cobertura junit html reports -->
+        <cobertura-report format="html" destdir="${cobertura.coverage.html.dir}" datafile="${cobertura.data.file}">
+            <fileset dir="${src.dir}">
+                <include name="**/*.java" />
+                <exclude name="**/*$*.class"/>
+            </fileset>
+        </cobertura-report>
+    </target>
+
+    <!-- this is the default target - it does everything -->
+    <target name="all" depends="init, clean, compile, javadoc, jar, dist, run, test, coverage, wipedb"
+            description="deletes previous work, compiles new classes, runs stock ticker program, runs junit tests, etc."/>
+
+</project>
