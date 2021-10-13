@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "879328779499",
+    "firebase_url": "https://don8-8acd8.firebaseio.com",
+    "project_id": "don8-8acd8",
+    "storage_bucket": "don8-8acd8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:879328779499:android:f4836c6e2d0183a8",
+        "android_client_info": {
+          "package_name": "com.example.don8"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "879328779499-gn01m7iqr0g426pmutigs14tcoai0k4d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj0U36Fm2IoEO_Qvvtw-ETWsvA5nYvrTg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "879328779499-gn01m7iqr0g426pmutigs14tcoai0k4d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

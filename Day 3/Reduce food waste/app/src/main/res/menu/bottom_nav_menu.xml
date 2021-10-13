@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_donate"
+        android:enabled="true"
+        android:icon="@drawable/ic_action_donate"
+        android:title="Donate"
+        android:visible="true"
+        app:labelVisibilityMode="labeled"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_history"
+        android:enabled="true"
+        android:icon="@drawable/ic_action_history"
+        android:title="History"
+        android:visible="true"
+        app:labelVisibilityMode="labeled"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_data"
+        android:enabled="true"
+        android:icon="@drawable/ic_action_data"
+        android:title="Data"
+        android:visible="true"
+        app:labelVisibilityMode="labeled"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_profile"
+        android:enabled="true"
+        android:icon="@drawable/ic_action_profile"
+        android:title="Profile"
+        android:visible="true"
+        app:showAsAction="ifRoom" />
+
+</menu>

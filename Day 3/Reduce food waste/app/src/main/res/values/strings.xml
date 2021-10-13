@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Don8</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title">don8</string>
+    <string name="welcome">welcome to</string>
+    <string name="restaurant">RESTAURANT SIGN UP</string>
+    <string name="donation">DONATION CENTER SIGN UP</string>
+    <string name="login">LOGIN</string>
+    <string name="restaurant_name">Restaurant Name</string>
+</resources>
