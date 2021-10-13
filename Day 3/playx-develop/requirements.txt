@@ -1,0 +1,6 @@
+youtube_dl
+requests
+beautifulsoup4
+lxml
+selenium
+youtube-search
